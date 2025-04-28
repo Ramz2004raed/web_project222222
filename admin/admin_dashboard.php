@@ -111,30 +111,7 @@
             transform: scale(1.05);
         }
 
-        /* استجابة التصميم */
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 200px;
-            }
-
-            .main-content {
-                margin-right: 220px;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .sidebar {
-                width: 100%;
-                height: auto;
-                position: relative;
-                padding-bottom: 20px;
-            }
-
-            .main-content {
-                margin-right: 0;
-                padding: 20px;
-            }
-        }
+        
     </style>
     <!-- إضافة خط Tajawal من Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
@@ -154,20 +131,7 @@
         <div class="container">
             <h1>مرحبًا بك في لوحة تحكم الإدارة</h1>
 
-            <!-- عرض الأخبار -->
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="card">
-                        <div class="card-header bg-primary text-white">
-                            عدد الأخبار
-                        </div>
-                        <div class="card-body">
-                            <h5 class="card-title">15 خبرًا</h5>
-                            <p class="card-text">عرض كل الأخبار المنشورة في النظام.</p>
-                            <a href="manage_news.php" class="btn btn-primary">عرض الأخبار</a>
-                        </div>
-                    </div>
-                </div>
+            <
                 <div class="col-md-4">
                     <div class="card">
                         <div class="card-header bg-success text-white">

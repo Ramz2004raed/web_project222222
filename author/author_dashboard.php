@@ -1,25 +1,42 @@
+<?php
+session_start();
+include '../config/db.php'; // تأكد من صحة المسار
 
+// تحقق من تسجيل الدخول
+if ($_SESSION['user_role'] != 'author') {
+    header("Location: login.php"); // إعادة التوجيه إذا لم يكن المحرر
+    exit();
+}
 
+$author_id = $_SESSION['user_id'];
 
+// استعلام لجلب الأخبار الخاصة بالمؤلف
+$query = "SELECT news.*, category.name AS category_name 
+          FROM news 
+          INNER JOIN category ON news.category_id = category.id 
+          WHERE author_id = ? 
+          ORDER BY dateposted DESC";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $author_id);
+$stmt->execute();
+$result = $stmt->get_result();
+?>
 
 <!DOCTYPE html>
-
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة تحكم المؤلف</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
+    <!-- نفس رأس الصفحة كما زودتني -->
+</head>
+
+
+<style>
+body {
             font-family: 'Tajawal', sans-serif;
             background-color: #f8f9fa;
             margin: 0;
             overflow-x: hidden;
         }
 
-        /* تصميم الشريط الجانبي */
         .sidebar {
             background-color: #2c3e50;
             color: white;
@@ -52,7 +69,6 @@
             padding-right: 30px;
         }
 
-        /* تصميم المحتوى الرئيسي */
         .main-content {
             margin-right: 270px;
             padding: 40px 20px;
@@ -60,113 +76,96 @@
             transition: margin-right 0.3s ease;
         }
 
-        .main-content h1 {
+        .main-content h2 {
             color: #2c3e50;
             font-size: 2rem;
             margin-bottom: 30px;
         }
 
-        /* تصميم زر إضافة خبر جديد */
-        .btn-success {
-            background-color: #28a745;
-            border-color: #28a745;
-            border-radius: 5px;
-            padding: 10px 20px;
-            font-size: 1rem;
-            transition: background-color 0.3s ease, transform 0.1s ease;
-        }
-
-        .btn-success:hover {
-            background-color: #218838;
-            border-color: #1e7e34;
-            transform: scale(1.05);
-        }
-
-        /* تصميم الجدول */
-        .table-responsive {
+        .form-container {
+            background-color: #fff;
+            padding: 30px;
             border-radius: 10px;
-            overflow: hidden;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
         }
 
-        .table {
-            margin-bottom: 0;
-            background-color: #fff;
+        .form-label {
+            font-weight: 500;
+            color: #2c3e50;
         }
 
-        .table thead {
-            background-color: #2c3e50;
-            color: #fff;
-        }
-
-        .table th, .table td {
-            vertical-align: middle;
-            padding: 15px;
-            text-align: center;
-        }
-
-        .table tbody tr {
-            transition: background-color 0.3s ease;
-        }
-
-        .table tbody tr:hover {
-            background-color: #f1f3f5;
-        }
-
-        /* تصميم البادج */
-        .badge {
-            font-size: 0.9rem;
-            padding: 8px 12px;
-            border-radius: 20px;
-        }
-
-        .badge.bg-success {
-            background-color: #28a745 !important;
-        }
-
-        .badge.bg-warning {
-            background-color: #f39c12 !important;
-            color: #fff !important;
-        }
-
-        .badge.bg-danger {
-            background-color: #e74c3c !important;
-        }
-
-        /* تصميم الأزرار */
-        .btn-sm {
+        .form-control, .form-select {
             border-radius: 5px;
-            padding: 6px 15px;
-            font-size: 0.85rem;
-            transition: background-color 0.3s ease, transform 0.1s ease;
+            padding: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+        }
+
+        textarea.form-control {
+            resize: vertical;
         }
 
         .btn-primary {
             background-color: #3498db;
             border-color: #3498db;
+            border-radius: 5px;
+            padding: 12px;
+            font-size: 1rem;
+            transition: background-color 0.3s ease, transform 0.1s ease;
         }
 
         .btn-primary:hover {
             background-color: #2980b9;
             border-color: #2980b9;
-            transform: scale(1.05);
+            transform: scale(1.02);
         }
 
-        .btn-danger {
-            background-color: #e74c3c;
-            border-color: #e74c3c;
+        .alert {
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
         }
 
-        .btn-danger:hover {
-            background-color: #c0392b;
-            border-color: #c0392b;
-            transform: scale(1.05);
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
         }
 
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .main-content {
+                margin-right: 220px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                padding-bottom: 20px;
+            }
+
+            .main-content {
+                margin-right: 0;
+                padding: 20px;
+            }
+        }
     </style>
-    <!-- إضافة خط Tajawal من Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
-</head>
+
 <body>
     <!-- الشريط الجانبي -->
     <div class="sidebar">
@@ -174,7 +173,7 @@
         <a href="author_dashboard.php">لوحة تحكم المؤلف</a>
         <a href="add_news.php">إضافة خبر جديد</a>
         <a href="../Front_Page.php">تسجيل الخروج</a>
-        </div>
+    </div>
 
     <!-- المحتوى الرئيسي -->
     <div class="main-content">
@@ -182,10 +181,9 @@
             <h1>لوحة تحكم المؤلف</h1>
 
             <div class="d-flex justify-content-end mb-4">
-                <a href="add-news.php" class="btn btn-success">إضافة خبر جديد</a>
+                <a href="add_news.php" class="btn btn-success">إضافة خبر جديد</a>
             </div>
 
-            <!-- جدول الأخبار -->
             <div class="table-responsive">
                 <table class="table table-bordered">
                     <thead>
@@ -198,7 +196,26 @@
                         </tr>
                     </thead>
                     <tbody>
-                        
+                        <?php while ($row = $result->fetch_assoc()): ?>
+                            <tr>
+                                <td><?= htmlspecialchars($row['title']) ?></td>
+                                <td><?= htmlspecialchars($row['category_name']) ?></td>
+                                <td><?= date("Y-m-d", strtotime($row['dateposted'])) ?></td>
+                                <td>
+                                    <?php if ($row['status'] == 'approved'): ?>
+                                        <span class="badge bg-success">مقبول</span>
+                                    <?php elseif ($row['status'] == 'pending'): ?>
+                                        <span class="badge bg-warning">قيد الانتظار</span>
+                                    <?php else: ?>
+                                        <span class="badge bg-danger">مرفوض</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <a href="edit_news.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-primary">تعديل</a>
+                                    <a href="delete_news.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('هل أنت متأكد من الحذف؟');">حذف</a>
+                                </td>
+                            </tr>
+                        <?php endwhile; ?>
                     </tbody>
                 </table>
             </div>

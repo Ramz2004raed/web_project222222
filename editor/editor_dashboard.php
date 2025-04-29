@@ -1,10 +1,46 @@
+<?php
+session_start();
+include '../config/db.php'; // تأكد من أن هذا الملف يحتوي على الاتصال بقاعدة البيانات
+
+// التحقق من دور المستخدم
+if ($_SESSION['user_role'] != 'editor') {
+    header("Location: login.php"); // إعادة التوجيه إذا لم يكن المحرر
+    exit();
+}
+
+// جلب الأخبار من قاعدة البيانات
+$query = "SELECT * FROM news";
+$result = mysqli_query($conn, $query);
+
+// التعامل مع عمليات الموافقة والرفض والحذف
+if (isset($_GET['action']) && isset($_GET['id'])) {
+    $id = $_GET['id'];
+    $action = $_GET['action'];
+
+    if ($action == 'approve') {
+        $update_query = "UPDATE news SET status='approved' WHERE id=$id";
+        mysqli_query($conn, $update_query);
+    } elseif ($action == 'deny') {
+        $update_query = "UPDATE news SET status='denied' WHERE id=$id";
+        mysqli_query($conn, $update_query);
+    } elseif ($action == 'delete') {
+        $delete_query = "DELETE FROM news WHERE id=$id";
+        mysqli_query($conn, $delete_query);
+    }
+
+    // إعادة التوجيه بعد العملية
+    header("Location: editor_dashboard.php");
+    exit();
+}
+
+?>
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>إدارة الأخبار</title>
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -68,7 +104,6 @@
             margin-bottom: 20px;
         }
 
-        /* تصميم الجداول */
         .table-responsive {
             border-radius: 8px;
             overflow: hidden;
@@ -100,7 +135,6 @@
             background-color: #f1f3f5;
         }
 
-        /* تصميم البادج */
         .badge {
             font-size: 0.9rem;
             padding: 8px 12px;
@@ -122,7 +156,6 @@
             color: white;
         }
 
-        /* تصميم الأزرار */
         .btn-custom {
             background-color: #3498db;
             color: white;
@@ -151,27 +184,18 @@
             border-color: #c0392b;
             transform: scale(1.05);
         }
-
-       
     </style>
-    <!-- إضافة خط Tajawal من Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- الشريط الجانبي -->
     <div class="sidebar">
         <h4>لوحة تحكم المحرر</h4>
         <a href="editor_dashboard.php">لوحة تحكم المحرر</a>
-        
         <a href="../Front_Page.php">تسجيل الخروج</a>
     </div>
 
-    <!-- المحتوى الرئيسي -->
     <div class="main-content">
         <div class="container">
             <h1>إدارة الأخبار</h1>
-
-            <!-- جدول الأخبار -->
             <div class="table-responsive">
                 <table class="table table-bordered">
                     <thead>
@@ -179,74 +203,40 @@
                             <th>العنوان</th>
                             <th>التصنيف</th>
                             <th>تاريخ النشر</th>
+                            <th>الحالة</th>
                             <th>خيارات</th>
                         </tr>
                     </thead>
                     <tbody>
+                        <?php while ($row = mysqli_fetch_assoc($result)): ?>
                         <tr>
-                            <td>خبر حول الاقتصاد العالمي</td>
-                            <td>اقتصاد</td>
-                            <td>2025-04-27</td>
+                            <td><?= htmlspecialchars($row['title']) ?></td>
+                            <td><?= htmlspecialchars($row['category']) ?></td>
+                            <td><?= htmlspecialchars($row['publish_date']) ?></td>
                             <td>
-                                <a href="approve_news.php?id=1" class="btn btn-sm btn-custom">موافقة</a>
-                                <a href="deny_news.php?id=1" class="btn btn-sm btn-danger">رفض</a>
-                                <a href="delete_news.php?id=1" class="btn btn-sm btn-danger">حذف</a>
+                                <?php
+                                if ($row['status'] == 'approved') {
+                                    echo '<span class="badge badge-approved">موافق عليه</span>';
+                                } elseif ($row['status'] == 'denied') {
+                                    echo '<span class="badge badge-denied">مرفوض</span>';
+                                } else {
+                                    echo '<span class="badge badge-pending">معلق</span>';
+                                }
+                                ?>
+                            </td>
+                            <td>
+                                <a href="editor_dashboard.php?action=approve&id=<?= $row['id'] ?>" class="btn btn-sm btn-custom">موافقة</a>
+                                <a href="editor_dashboard.php?action=deny&id=<?= $row['id'] ?>" class="btn btn-sm btn-danger">رفض</a>
+                                <a href="editor_dashboard.php?action=delete&id=<?= $row['id'] ?>" class="btn btn-sm btn-danger">حذف</a>
                             </td>
                         </tr>
-                        <tr>
-                            <td>تطورات سياسية في الشرق الأوسط</td>
-                            <td>سياسة</td>
-                            <td>2025-04-25</td>
-                            <td>
-                                <a href="approve_news.php?id=2" class="btn btn-sm btn-custom">موافقة</a>
-                                <a href="deny_news.php?id=2" class="btn btn-sm btn-danger">رفض</a>
-                                <a href="delete_news.php?id=2" class="btn btn-sm btn-danger">حذف</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>أزمة صحية في أوروبا</td>
-                            <td>صحة</td>
-                            <td>2025-04-22</td>
-                            <td>
-                                <a href="approve_news.php?id=3" class="btn btn-sm btn-custom">موافقة</a>
-                                <a href="deny_news.php?id=3" class="btn btn-sm btn-danger">رفض</a>
-                                <a href="delete_news.php?id=3" class="btn btn-sm btn-danger">حذف</a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- جدول حالة الأخبار -->
-            <h3>حالة الأخبار</h3>
-            <div class="table-responsive">
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>العنوان</th>
-                            <th>الحالة</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>خبر حول الاقتصاد العالمي</td>
-                            <td><span class="badge badge-approved">موافق عليه</span></td>
-                        </tr>
-                        <tr>
-                            <td>تطورات سياسية في الشرق الأوسط</td>
-                            <td><span class="badge badge-pending">معلق</span></td>
-                        </tr>
-                        <tr>
-                            <td>أزمة صحية في أوروبا</td>
-                            <td><span class="badge badge-denied">مرفوض</span></td>
-                        </tr>
+                        <?php endwhile; ?>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

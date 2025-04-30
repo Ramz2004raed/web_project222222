@@ -2,7 +2,7 @@
     require_once 'config/db.php';
 
     // استعلام لجلب الأخبار
-    $sql = "SELECT * FROM news WHERE status = 'approved' ORDER BY dateposted DESC";
+    $sql = "SELECT * FROM news WHERE status = 'published' ORDER BY dateposted DESC";
     $result = $conn->query($sql);
 ?>
 
@@ -93,27 +93,26 @@
         <div class="top-news mb-5">
             <h2 class="section-title">أهم الأخبار</h2>
             <div class="row">
-                <?php 
-                // عرض الأخبار الرئيسية
-                if ($result->num_rows > 0) {
-                    while($row = $result->fetch_assoc()) {
-                        if ($row['category_id'] == 1) {
-                ?>
-                <div class="col-md-8">
-                    <div class="main-news-card">
-                        <img src="<?php echo $row['image']; ?>" alt="<?php echo $row['title']; ?>" class="img-fluid">
-                        <div class="news-content">
-                            <h3><?php echo $row['title']; ?></h3>
-                            <p><?php echo substr($row['body'], 0, 150) . '...'; ?></p>
-                            <a href="details.php?id=<?php echo $row['id']; ?>" class="btn btn-primary">المزيد</a>
-                        </div>
-                    </div>
-                </div>
-                <?php 
-                        }
-                    }
-                }
-                ?>
+            <?php 
+if ($result->num_rows > 0) {
+    while($row = $result->fetch_assoc()) {
+        // تم إزالة شرط التصنيف هنا ليتم عرض جميع الأخبار
+?>
+    <div class="col-md-8">
+        <div class="main-news-card">
+            <img src="Uploads\<?php echo $row['image']; ?>" alt="<?php echo $row['title']; ?>" class="img-fluid">
+            <div class="news-content">
+                <h3><?php echo $row['title']; ?></h3>
+                <p><?php echo substr($row['body'], 0, 150) . '...'; ?></p>
+                <a href="details.php?id=<?php echo $row['id']; ?>" class="btn btn-primary">المزيد</a>
+            </div>
+        </div>
+    </div>
+<?php 
+    }
+}
+?>
+
             </div>
         </div>
 
@@ -122,7 +121,7 @@
             <h2>سياسة</h2>
             <div class="row">
                 <?php
-                $sql_policy = "SELECT * FROM news WHERE category_id = 1 AND status = 'approved' ORDER BY dateposted DESC LIMIT 4";
+                $sql_policy = "SELECT * FROM news WHERE category_id = 1 AND status = 'published' ORDER BY dateposted DESC LIMIT 4";
                 $result_policy = $conn->query($sql_policy);
 
                 if ($result_policy->num_rows > 0) {
@@ -150,7 +149,7 @@
             <h2>اقتصاد</h2>
             <div class="row">
                 <?php
-                $sql_economy = "SELECT * FROM news WHERE category_id = 2 AND status = 'approved' ORDER BY dateposted DESC LIMIT 4";
+                $sql_economy = "SELECT * FROM news WHERE category_id = 2 AND status = 'published' ORDER BY dateposted DESC LIMIT 4";
                 $result_economy = $conn->query($sql_economy);
 
                 if ($result_economy->num_rows > 0) {
@@ -178,7 +177,7 @@
             <h2>رياضة</h2>
             <div class="row">
                 <?php
-                $sql_sports = "SELECT * FROM news WHERE category_id = 3 AND status = 'approved' ORDER BY dateposted DESC LIMIT 4";
+                $sql_sports = "SELECT * FROM news WHERE category_id = 3 AND status = 'published' ORDER BY dateposted DESC LIMIT 4";
                 $result_sports = $conn->query($sql_sports);
 
                 if ($result_sports->num_rows > 0) {
@@ -206,7 +205,7 @@
             <h2>صحة</h2>
             <div class="row">
                 <?php
-                $sql_health = "SELECT * FROM news WHERE category_id = 4 AND status = 'approved' ORDER BY dateposted DESC LIMIT 4";
+                $sql_health = "SELECT * FROM news WHERE category_id = 4 AND status = 'published' ORDER BY dateposted DESC LIMIT 4";
                 $result_health = $conn->query($sql_health);
 
                 if ($result_health->num_rows > 0) {

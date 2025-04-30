@@ -3,7 +3,7 @@ session_start();
 include '../config/db.php';
 
 // التحقق من صلاحية المستخدم
-if ($_SESSION['role'] == 'author') {
+if (   $_SESSION['role'] == 'author') {
     header("Location: login.php");
     exit;
 }
@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $stmt = $conn->prepare("INSERT INTO news (title, body, image, dateposted, category_id, author_id, status) VALUES (?, ?, ?, NOW(), ?, ?, 'pending')");
-    $stmt->bind_param( $title, $body, $image_name, $category_id, $author_id);
+    $stmt->bind_param("sssii", $title, $body, $image_name, $category_id, $author_id);
 
     if ($stmt->execute()) {
         $success_message = "تمت إضافة الخبر بنجاح! بانتظار الموافقة.";
@@ -189,7 +189,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="sidebar">
     <h4 class="text-center text-white">لوحة التحكم</h4>
     <a href="author_dashboard.php">لوحة تحكم المؤلف</a>
-    <a href="add-news.php">إضافة خبر جديد</a>
+    <a href="add_news.php">إضافة خبر جديد</a>
     <a href="../Front_Page.php">تسجيل الخروج</a>
 </div>
 
@@ -204,7 +204,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <div class="form-container">
-            <form action="add-news.php" method="POST" enctype="multipart/form-data">
+            <form action="add_news.php" method="POST" enctype="multipart/form-data">
                 <div class="mb-3">
                     <label class="form-label">عنوان الخبر</label>
                     <input type="text" name="title" class="form-control" required>

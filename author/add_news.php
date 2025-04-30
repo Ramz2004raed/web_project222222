@@ -159,29 +159,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: #721c24;
         }
 
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 200px;
-            }
-
-            .main-content {
-                margin-right: 220px;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .sidebar {
-                width: 100%;
-                height: auto;
-                position: relative;
-                padding-bottom: 20px;
-            }
-
-            .main-content {
-                margin-right: 0;
-                padding: 20px;
-            }
-        }
+   
     </style>
 </head>
 <body>
